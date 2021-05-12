@@ -1,0 +1,242 @@
+Gerald Arocena
+CSCI E-97, Fall 2019
+Assignment 1
+Results for "ledger.script"
+
+# create-ledger <name> description <description> seed <seed>
+-: Create-ledger test description "test ledger" seed "cambridge"
+
+# create-account <account-id>
+-: create-account mary
+
+-: create-account bob
+
+-: create-account bill
+
+-: create-account susan
+
+-: create-account jack
+
+# get-account-balance <account-id>
+# expect error since not committed to a block
+-: get-account-balance mary
+
+LedgerException thrown --
+ - Action: get account balance
+ - Reason: account balance information unavailable
+
+#process-transaction <transaction-id> amount <amount> fee <fee> payload <payload> payer <account-address> receiver <account-address>
+-: process-transaction 1 amount 1000 fee 10 payload "fund account" payer master receiver mary
+
+Transaction '1' processed.
+
+-: process-transaction 2 amount 1000 fee 10 payload "fund account" payer master receiver bob
+
+Transaction '2' processed.
+
+-: process-transaction 3 amount 1000 fee 10 payload "fund account" payer master receiver bill
+
+Transaction '3' processed.
+
+-: process-transaction 4 amount 1000 fee 10 payload "fund account" payer master receiver susan
+
+Transaction '4' processed.
+
+-: process-transaction 5 amount 1000 fee 10 payload "fund account" payer master receiver mary
+
+Transaction '5' processed.
+
+# expect error since the account mary has not been committed to a block
+-: get-account-balance mary
+
+LedgerException thrown --
+ - Action: get account balance
+ - Reason: account balance information unavailable
+
+# should not show any account balances since no block has been committed
+-: get-account-balances
+
+LedgerException thrown --
+ - Action: get account balances
+ - Reason: no account balance map has been created yet
+
+-: process-transaction 6 amount 1000 fee 10 payload "fund account" payer master receiver bob
+
+Transaction '6' processed.
+
+-: process-transaction 7 amount 1000 fee 10 payload "fund account" payer master receiver bill
+
+Transaction '7' processed.
+
+-: process-transaction 8 amount 1000 fee 10 payload "fund account" payer master receiver susan
+
+Transaction '8' processed.
+
+-: process-transaction 9 amount 1000 fee 10 payload "fund account" payer master receiver mary
+
+Transaction '9' processed.
+
+-: process-transaction 10 amount 1000 fee 10 payload "fund account" payer master receiver bob
+
+Transaction '10' processed.
+
+# expect balance of 3000 for mary
+-: get-account-balance mary
+
+Account "mary" has balance of 3000.
+
+# expect balance of 3000 for bob
+-: get-account-balance bob
+
+Account "bob" has balance of 3000.
+
+# expect balance of 2000 for bill
+-: get-account-balance bill
+
+Account "bill" has balance of 2000.
+
+# expect balance of 2000 for susan
+-: get-account-balance susan
+
+Account "susan" has balance of 2000.
+
+# expect balance of 0 for jack
+-: get-account-balance jack
+
+Account "jack" has balance of 0.
+
+# show the details of block #1
+-: get-block 1
+
+Block '1' information --
+ - previousHash = null
+ - hash = 154072b210f705e94d2758e3dd2783a9a4045e907678591f3129b73036273cf7
+ - previousBlock = null
+ - Transactions:
+    1.) transaction 1 amount 1000 fee 10 payload "fund account" payer master receiver mary
+    2.) transaction 2 amount 1000 fee 10 payload "fund account" payer master receiver bob
+    3.) transaction 3 amount 1000 fee 10 payload "fund account" payer master receiver bill
+    4.) transaction 4 amount 1000 fee 10 payload "fund account" payer master receiver susan
+    5.) transaction 5 amount 1000 fee 10 payload "fund account" payer master receiver mary
+    6.) transaction 6 amount 1000 fee 10 payload "fund account" payer master receiver bob
+    7.) transaction 7 amount 1000 fee 10 payload "fund account" payer master receiver bill
+    8.) transaction 8 amount 1000 fee 10 payload "fund account" payer master receiver susan
+    9.) transaction 9 amount 1000 fee 10 payload "fund account" payer master receiver mary
+    10.) transaction 10 amount 1000 fee 10 payload "fund account" payer master receiver bob
+ - Account balances (in units):
+    1.) "master": 2147473647
+    2.) "mary": 3000
+    3.) "bob": 3000
+    4.) "bill": 2000
+    5.) "susan": 2000
+    6.) "jack": 0
+
+#show the details of transaction 10
+-: get-transaction 10
+
+Transaction 10's information --
+ amount = 1000
+ fee = 10
+ payload = fund account
+ payer = master
+ receiver = bob
+
+-: process-transaction 11 amount 200 fee 10 payload "september rent" payer susan receiver jack
+
+Transaction '11' processed.
+
+# expect balance of 2000 for susan
+-: get-account-balance susan
+
+Account "susan" has balance of 2000.
+
+# expect balance of 0 for jack
+-: get-account-balance jack
+
+Account "jack" has balance of 0.
+
+-: process-transaction 12 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '12' processed.
+
+-: process-transaction 13 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '13' processed.
+
+-: process-transaction 14 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '14' processed.
+
+-: process-transaction 15 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '15' processed.
+
+-: process-transaction 16 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '16' processed.
+
+-: process-transaction 17 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '17' processed.
+
+-: process-transaction 18 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '18' processed.
+
+-: process-transaction 19 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '19' processed.
+
+-: process-transaction 20 amount 20 fee 10 payload "uber" payer bob receiver mary
+
+Transaction '20' processed.
+
+# expect balance of 200 for jack
+-: get-account-balance jack
+
+Account "jack" has balance of 200.
+
+# expect balance of 2000 - 200 - 10 => 1790
+-: get-account-balance susan
+
+Account "susan" has balance of 1790.
+
+# expect balance of 3000 + 180 => 3180
+-: get-account-balance mary
+
+Account "mary" has balance of 3180.
+
+# expect balance of 3000 - 180 - 90 => 2730
+-: get-account-balance bob
+
+Account "bob" has balance of 2730.
+
+# show all account balances for master, mary, bob, bill, susan, and jack
+-: get-account-balances
+
+Account Balances (in units) --
+ 1.) "master": 2147473747
+ 2.) "mary": 3180
+ 3.) "bob": 2730
+ 4.) "bill": 2000
+ 5.) "susan": 1790
+ 6.) "jack": 200
+
+# this transaction should fail since it exceeds the account balance for ▒bob▒.
+-: process-transaction 21 amount 5000 fee 10 payload "food" payer bob receiver mary
+
+LedgerException thrown --
+ - Action: submit transaction
+ - Reason: Payer has insufficient funds for amount and fee; transaction cancelled
+
+# this transaction should fail since the minimum fee is not provided
+-: process-transaction 22 amount 20 fee 5 payload "food" payer bob receiver mary
+
+LedgerException thrown --
+ - Action: submit transaction
+ - Reason: 10 unit minimum fee required; transaction cancelled
+
+# validate the state of the blockchain
+-: Validate
+
+Blockchain is valid.

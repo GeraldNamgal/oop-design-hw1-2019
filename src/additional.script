@@ -1,0 +1,118 @@
+# Exception: entering input when no ledger exists yet
+create-account john
+
+# Create ledger
+Create-ledger ledger description "for blockchaining" seed "CSCIE-97"
+
+# Exception: creating ledger more than once (can only be one ledger)
+Create-ledger ledger2 description "for blockchaining" seed "CSCIE-97"
+
+# Print block '1' (genesisBlock) information
+get-block 1
+
+# Create accounts
+create-account john
+create-account greg
+create-account samantha
+create-account harry
+create-account hank
+
+# Exception: account id/address already exists (tried adding "hank" account again)
+create-account hank
+
+# Have "master" account fund other accounts
+process-transaction 0 amount 2000 fee 10 payload "fund account" payer master receiver john
+process-transaction 1 amount 2000 fee 10 payload "fund account" payer master receiver greg
+process-transaction 2 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+process-transaction 3 amount 2000 fee 10 payload "fund account" payer master receiver harry
+
+# Exception: duplicate transaction id; change transaction id to '4' (suggestedId)
+process-transaction 2 amount 1000 fee 10 payload "fund account" payer master receiver harry
+
+# Exception: invalid payer account
+process-transaction 5 amount 2000 fee 10 payload "fund account" payer invalidPayer receiver samantha
+
+# Exception: invalid receiver account
+process-transaction 5 amount 2000 fee 10 payload "fund account" payer master receiver invalidReceiver
+
+process-transaction 5 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+process-transaction 6 amount 2000 fee 10 payload "fund account" payer master receiver john
+process-transaction 7 amount 1000 fee 10 payload "fund account" payer master receiver samantha
+process-transaction 8 amount 700 fee 10 payload "fund account" payer master receiver john
+process-transaction 9 amount 500 fee 10 payload "fund account" payer master receiver john
+
+# Block '1' should now be completed (i.e., can now see account balances)
+get-account-balance master
+
+# Exception: account address does not exist (query for invalid account)
+get-account-balance chaz
+
+get-account-balances
+
+# Print genesisBlock's (block '1') information which should now have a hash
+get-block 1
+
+# Print current block's (block '2') information
+get-block 2
+
+# Exception: block not found (query for a block that doesn't exist)
+get-block 0
+
+# Command for get total number of blocks
+get-total-blocks
+
+# Create a new account
+create-account arnold
+
+# Call getBlock() (block '2' should have seven accounts and block '1' should still have six)
+get-block 2
+get-block 1
+
+# Process some transactions on block '2'
+process-transaction 10 amount 450 fee 10 payload "monthly rent" payer harry receiver arnold
+process-transaction 11 amount 1000 fee 10 payload "gift" payer john receiver hank
+process-transaction 12 amount 1000 fee 10 payload "television" payer samantha receiver hank
+
+# Call getBlock() (block '2' should have three transactions and block '1' should still have 10)
+get-block 2
+get-block 1
+
+# getAccountBalance() for "arnold" should return error (block '2' not completed yet)
+get-account-balance arnold
+
+# getAccountBalance() for "hank" should still be 0 (block '2' not completed yet)
+get-account-balance hank
+
+process-transaction 13 amount 350 fee 10 payload "rent and utilities" payer samantha receiver arnold
+process-transaction 14 amount 500 fee 10 payload "rent, camping, utilities" payer john receiver arnold
+process-transaction 15 amount 400 fee 10 payload "bar night" payer samantha receiver arnold
+process-transaction 16 amount 350 fee 10 payload "vegas" payer john receiver arnold
+process-transaction 17 amount 600 fee 10 payload "donation" payer harry receiver greg
+process-transaction 18 amount 250 fee 10 payload "redacted purchase" payer samantha receiver samantha
+
+# Should still return last complete block information (i.e., block '1' info)
+get-account-balances
+
+# Process 20th transaction
+process-transaction 19 amount 300 fee 10 payload "house help" payer greg receiver arnold
+
+# Block '2' should now be closed and currentBlock should now be block '3'
+get-account-balances
+
+# Get block 2's information (should now have hash)
+get-block 2
+
+# Exception: transaction not found
+get-transaction 20
+
+# Get first transaction in block '1'
+get-transaction 0
+
+# Get last transaction in block '2'
+get-transaction 19
+
+# Exception: invalid DSL command syntax
+process-transaction 20 amount 275 fee 10 payload "loan" payer samantha greg
+
+# Validate the blockchain
+validate

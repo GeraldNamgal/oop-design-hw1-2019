@@ -1,0 +1,425 @@
+Gerald Arocena
+CSCI E-97, Fall 2019
+Assignment 1
+Results for "additional.script"
+
+# Exception: entering input when no ledger exists yet
+-: create-account john
+
+CommandProcessorException thrown --
+ Action: in processCommandFile method
+ Reason: no ledger exists; input rejected
+ Line number: 2
+
+# Create ledger
+-: Create-ledger ledger description "for blockchaining" seed "CSCIE-97"
+
+# Exception: creating ledger more than once (can only be one ledger)
+-: Create-ledger ledger2 description "for blockchaining" seed "CSCIE-97"
+
+CommandProcessorException thrown --
+ Action: in processCommandFile method
+ Reason: ledger already exists; input rejected
+ Line number: 8
+
+# Print block '1' (genesisBlock) information
+-: get-block 1
+
+Block '1' information --
+ - previousHash = null
+ - hash = null
+ - previousBlock = null
+ - Transactions:
+    None
+ - Account balances (in units):
+    1.) "master": 2147483647
+
+# Create accounts
+-: create-account john
+
+-: create-account greg
+
+-: create-account samantha
+
+-: create-account harry
+
+-: create-account hank
+
+# Exception: account id/address already exists (tried adding "hank" account again)
+-: create-account hank
+
+LedgerException thrown --
+ - Action: create account
+ - Reason: account address already exists; account not created
+
+# Have "master" account fund other accounts
+-: process-transaction 0 amount 2000 fee 10 payload "fund account" payer master receiver john
+
+Transaction '0' processed.
+
+-: process-transaction 1 amount 2000 fee 10 payload "fund account" payer master receiver greg
+
+Transaction '1' processed.
+
+-: process-transaction 2 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+
+Transaction '2' processed.
+
+-: process-transaction 3 amount 2000 fee 10 payload "fund account" payer master receiver harry
+
+Transaction '3' processed.
+
+# Exception: duplicate transaction id; change transaction id to '4' (suggestedId)
+-: process-transaction 2 amount 1000 fee 10 payload "fund account" payer master receiver harry
+
+LedgerException thrown --
+ - Action: submit transaction
+ - Reason: duplicate ID submitted; ID changed to "4"
+
+Transaction '4' processed.
+
+# Exception: invalid payer account
+-: process-transaction 5 amount 2000 fee 10 payload "fund account" payer invalidPayer receiver samantha
+
+LedgerException thrown --
+ - Action: submit transaction
+ - Reason: payer account not found; transaction cancelled
+
+# Exception: invalid receiver account
+-: process-transaction 5 amount 2000 fee 10 payload "fund account" payer master receiver invalidReceiver
+
+LedgerException thrown --
+ - Action: submit transaction
+ - Reason: receiver account not found; transaction cancelled
+
+-: process-transaction 5 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+
+Transaction '5' processed.
+
+-: process-transaction 6 amount 2000 fee 10 payload "fund account" payer master receiver john
+
+Transaction '6' processed.
+
+-: process-transaction 7 amount 1000 fee 10 payload "fund account" payer master receiver samantha
+
+Transaction '7' processed.
+
+-: process-transaction 8 amount 700 fee 10 payload "fund account" payer master receiver john
+
+Transaction '8' processed.
+
+-: process-transaction 9 amount 500 fee 10 payload "fund account" payer master receiver john
+
+Transaction '9' processed.
+
+# Block '1' should now be completed (i.e., can now see account balances)
+-: get-account-balance master
+
+Account "master" has balance of 2147468447.
+
+# Exception: account address does not exist (query for invalid account)
+-: get-account-balance chaz
+
+LedgerException thrown --
+ - Action: get account balance
+ - Reason: account not found
+
+-: get-account-balances
+
+Account Balances (in units) --
+ 1.) "master": 2147468447
+ 2.) "john": 5200
+ 3.) "greg": 2000
+ 4.) "samantha": 5000
+ 5.) "harry": 3000
+ 6.) "hank": 0
+
+# Print genesisBlock's (block '1') information which should now have a hash
+-: get-block 1
+
+Block '1' information --
+ - previousHash = null
+ - hash = e646b9091562137e7fe2bb7eeb8b4c0ec35c60c954c4a245787b7d7b9130143d
+ - previousBlock = null
+ - Transactions:
+    1.) transaction 0 amount 2000 fee 10 payload "fund account" payer master receiver john
+    2.) transaction 1 amount 2000 fee 10 payload "fund account" payer master receiver greg
+    3.) transaction 2 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+    4.) transaction 3 amount 2000 fee 10 payload "fund account" payer master receiver harry
+    5.) transaction 4 amount 1000 fee 10 payload "fund account" payer master receiver harry
+    6.) transaction 5 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+    7.) transaction 6 amount 2000 fee 10 payload "fund account" payer master receiver john
+    8.) transaction 7 amount 1000 fee 10 payload "fund account" payer master receiver samantha
+    9.) transaction 8 amount 700 fee 10 payload "fund account" payer master receiver john
+    10.) transaction 9 amount 500 fee 10 payload "fund account" payer master receiver john
+ - Account balances (in units):
+    1.) "master": 2147468447
+    2.) "john": 5200
+    3.) "greg": 2000
+    4.) "samantha": 5000
+    5.) "harry": 3000
+    6.) "hank": 0
+
+# Print current block's (block '2') information
+-: get-block 2
+
+Block '2' information --
+ - previousHash = e646b9091562137e7fe2bb7eeb8b4c0ec35c60c954c4a245787b7d7b9130143d
+ - hash = null
+ - previousBlock = 1
+ - Transactions:
+    None
+ - Account balances (in units):
+    1.) "master": 2147468447
+    2.) "john": 5200
+    3.) "greg": 2000
+    4.) "samantha": 5000
+    5.) "harry": 3000
+    6.) "hank": 0
+
+# Exception: block not found (query for a block that doesn't exist)
+-: get-block 0
+
+LedgerException thrown --
+ - Action: get block
+ - Reason: block not found
+
+# Command for get total number of blocks
+-: get-total-blocks
+
+The total number of blocks in the blockchain is 2.
+
+# Create a new account
+-: create-account arnold
+
+# Call getBlock() (block '2' should have seven accounts and block '1' should still have six)
+-: get-block 2
+
+Block '2' information --
+ - previousHash = e646b9091562137e7fe2bb7eeb8b4c0ec35c60c954c4a245787b7d7b9130143d
+ - hash = null
+ - previousBlock = 1
+ - Transactions:
+    None
+ - Account balances (in units):
+    1.) "master": 2147468447
+    2.) "john": 5200
+    3.) "greg": 2000
+    4.) "samantha": 5000
+    5.) "harry": 3000
+    6.) "hank": 0
+    7.) "arnold": 0
+
+-: get-block 1
+
+Block '1' information --
+ - previousHash = null
+ - hash = e646b9091562137e7fe2bb7eeb8b4c0ec35c60c954c4a245787b7d7b9130143d
+ - previousBlock = null
+ - Transactions:
+    1.) transaction 0 amount 2000 fee 10 payload "fund account" payer master receiver john
+    2.) transaction 1 amount 2000 fee 10 payload "fund account" payer master receiver greg
+    3.) transaction 2 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+    4.) transaction 3 amount 2000 fee 10 payload "fund account" payer master receiver harry
+    5.) transaction 4 amount 1000 fee 10 payload "fund account" payer master receiver harry
+    6.) transaction 5 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+    7.) transaction 6 amount 2000 fee 10 payload "fund account" payer master receiver john
+    8.) transaction 7 amount 1000 fee 10 payload "fund account" payer master receiver samantha
+    9.) transaction 8 amount 700 fee 10 payload "fund account" payer master receiver john
+    10.) transaction 9 amount 500 fee 10 payload "fund account" payer master receiver john
+ - Account balances (in units):
+    1.) "master": 2147468447
+    2.) "john": 5200
+    3.) "greg": 2000
+    4.) "samantha": 5000
+    5.) "harry": 3000
+    6.) "hank": 0
+
+# Process some transactions on block '2'
+-: process-transaction 10 amount 450 fee 10 payload "monthly rent" payer harry receiver arnold
+
+Transaction '10' processed.
+
+-: process-transaction 11 amount 1000 fee 10 payload "gift" payer john receiver hank
+
+Transaction '11' processed.
+
+-: process-transaction 12 amount 1000 fee 10 payload "television" payer samantha receiver hank
+
+Transaction '12' processed.
+
+# Call getBlock() (block '2' should have three transactions and block '1' should still have 10)
+-: get-block 2
+
+Block '2' information --
+ - previousHash = e646b9091562137e7fe2bb7eeb8b4c0ec35c60c954c4a245787b7d7b9130143d
+ - hash = null
+ - previousBlock = 1
+ - Transactions:
+    1.) transaction 10 amount 450 fee 10 payload "monthly rent" payer harry receiver arnold
+    2.) transaction 11 amount 1000 fee 10 payload "gift" payer john receiver hank
+    3.) transaction 12 amount 1000 fee 10 payload "television" payer samantha receiver hank
+ - Account balances (in units):
+    1.) "master": 2147468477
+    2.) "john": 4190
+    3.) "greg": 2000
+    4.) "samantha": 3990
+    5.) "harry": 2540
+    6.) "hank": 2000
+    7.) "arnold": 450
+
+-: get-block 1
+
+Block '1' information --
+ - previousHash = null
+ - hash = e646b9091562137e7fe2bb7eeb8b4c0ec35c60c954c4a245787b7d7b9130143d
+ - previousBlock = null
+ - Transactions:
+    1.) transaction 0 amount 2000 fee 10 payload "fund account" payer master receiver john
+    2.) transaction 1 amount 2000 fee 10 payload "fund account" payer master receiver greg
+    3.) transaction 2 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+    4.) transaction 3 amount 2000 fee 10 payload "fund account" payer master receiver harry
+    5.) transaction 4 amount 1000 fee 10 payload "fund account" payer master receiver harry
+    6.) transaction 5 amount 2000 fee 10 payload "fund account" payer master receiver samantha
+    7.) transaction 6 amount 2000 fee 10 payload "fund account" payer master receiver john
+    8.) transaction 7 amount 1000 fee 10 payload "fund account" payer master receiver samantha
+    9.) transaction 8 amount 700 fee 10 payload "fund account" payer master receiver john
+    10.) transaction 9 amount 500 fee 10 payload "fund account" payer master receiver john
+ - Account balances (in units):
+    1.) "master": 2147468447
+    2.) "john": 5200
+    3.) "greg": 2000
+    4.) "samantha": 5000
+    5.) "harry": 3000
+    6.) "hank": 0
+
+# getAccountBalance() for "arnold" should return error (block '2' not completed yet)
+-: get-account-balance arnold
+
+LedgerException thrown --
+ - Action: get account balance
+ - Reason: account information unavailable
+
+# getAccountBalance() for "hank" should still be 0 (block '2' not completed yet)
+-: get-account-balance hank
+
+Account "hank" has balance of 0.
+
+-: process-transaction 13 amount 350 fee 10 payload "rent and utilities" payer samantha receiver arnold
+
+Transaction '13' processed.
+
+-: process-transaction 14 amount 500 fee 10 payload "rent, camping, utilities" payer john receiver arnold
+
+Transaction '14' processed.
+
+-: process-transaction 15 amount 400 fee 10 payload "bar night" payer samantha receiver arnold
+
+Transaction '15' processed.
+
+-: process-transaction 16 amount 350 fee 10 payload "vegas" payer john receiver arnold
+
+Transaction '16' processed.
+
+-: process-transaction 17 amount 600 fee 10 payload "donation" payer harry receiver greg
+
+Transaction '17' processed.
+
+-: process-transaction 18 amount 250 fee 10 payload "redacted purchase" payer samantha receiver samantha
+
+Transaction '18' processed.
+
+# Should still return last complete block information (i.e., block '1' info)
+-: get-account-balances
+
+Account Balances (in units) --
+ 1.) "master": 2147468447
+ 2.) "john": 5200
+ 3.) "greg": 2000
+ 4.) "samantha": 5000
+ 5.) "harry": 3000
+ 6.) "hank": 0
+
+# Process 20th transaction
+-: process-transaction 19 amount 300 fee 10 payload "house help" payer greg receiver arnold
+
+Transaction '19' processed.
+
+# Block '2' should now be closed and currentBlock should now be block '3'
+-: get-account-balances
+
+Account Balances (in units) --
+ 1.) "master": 2147468547
+ 2.) "john": 3320
+ 3.) "greg": 2290
+ 4.) "samantha": 3210
+ 5.) "harry": 1930
+ 6.) "hank": 2000
+ 7.) "arnold": 2350
+
+# Get block 2's information (should now have hash)
+-: get-block 2
+
+Block '2' information --
+ - previousHash = e646b9091562137e7fe2bb7eeb8b4c0ec35c60c954c4a245787b7d7b9130143d
+ - hash = 006dc048d7eea490ee6909e0c234aa6bea700dfd81b059cefdbf8f9e872c11a2
+ - previousBlock = 1
+ - Transactions:
+    1.) transaction 10 amount 450 fee 10 payload "monthly rent" payer harry receiver arnold
+    2.) transaction 11 amount 1000 fee 10 payload "gift" payer john receiver hank
+    3.) transaction 12 amount 1000 fee 10 payload "television" payer samantha receiver hank
+    4.) transaction 13 amount 350 fee 10 payload "rent and utilities" payer samantha receiver arnold
+    5.) transaction 14 amount 500 fee 10 payload "rent, camping, utilities" payer john receiver arnold
+    6.) transaction 15 amount 400 fee 10 payload "bar night" payer samantha receiver arnold
+    7.) transaction 16 amount 350 fee 10 payload "vegas" payer john receiver arnold
+    8.) transaction 17 amount 600 fee 10 payload "donation" payer harry receiver greg
+    9.) transaction 18 amount 250 fee 10 payload "redacted purchase" payer samantha receiver samantha
+    10.) transaction 19 amount 300 fee 10 payload "house help" payer greg receiver arnold
+ - Account balances (in units):
+    1.) "master": 2147468547
+    2.) "john": 3320
+    3.) "greg": 2290
+    4.) "samantha": 3210
+    5.) "harry": 1930
+    6.) "hank": 2000
+    7.) "arnold": 2350
+
+# Exception: transaction not found
+-: get-transaction 20
+
+LedgerException thrown --
+ - Action: get transaction
+ - Reason: transaction not found
+
+# Get first transaction in block '1'
+-: get-transaction 0
+
+Transaction 0's information --
+ amount = 2000
+ fee = 10
+ payload = fund account
+ payer = master
+ receiver = john
+
+# Get last transaction in block '2'
+-: get-transaction 19
+
+Transaction 19's information --
+ amount = 300
+ fee = 10
+ payload = house help
+ payer = greg
+ receiver = arnold
+
+# Exception: invalid DSL command syntax
+-: process-transaction 20 amount 275 fee 10 payload "loan" payer samantha greg
+
+CommandProcessorException thrown --
+ Action: in processCommandFile method
+ Reason: invalid DSL command input
+ Line number: 115
+
+# Validate the blockchain
+-: validate
+
+Blockchain is valid.

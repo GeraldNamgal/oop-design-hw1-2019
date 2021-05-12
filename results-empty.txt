@@ -1,0 +1,8 @@
+Gerald Arocena
+CSCI E-97, Fall 2019
+Assignment 1
+Results for "empty.script"
+
+CommandProcessorException thrown --
+ Action: in processCommandFile method
+ Reason: file is empty
